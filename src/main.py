@@ -79,6 +79,7 @@ def process_page(page):
             property_mci.monthly_mci_incr_per_room = mci_per_room.lstrip() if mci_per_room is not None else ""
         elif m := re.match(work_line_regex, line):
             mci_work, claim_cost, allow_cost = m.groups()
+            allow_cost = allow_cost.lstrip() if allow_cost is not None else ""
             property_mci.work_items.append(
                 WorkItem(name=mci_work,
                          claim_cost=claim_cost,
