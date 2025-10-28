@@ -102,14 +102,18 @@ def write_to_csv(property_mci: PropertyMci):
         'docket_number', 'case_status', 'closing_date', 'close_code',
         'monthly_mci_incr_per_room', 'address', 'work_items')(property_mci)
     (street_address, borough, zip_code) = attrgetter('street_address', 'borough', 'zip_code')(address)
-    for item in work_items:
-        (name, claim_cost, allow_cost) = attrgetter('name', 'claim_cost', 'allow_cost')(item)
+    if len(work_items) > 0:
+        for item in work_items:
+            (name, claim_cost, allow_cost) = attrgetter('name', 'claim_cost', 'allow_cost')(item)
+            output = (f"{street_address},{borough},{zip_code},{docket_number},{case_status},"
+                      f"{close_code},{monthly_mci_incr_per_room},"
+                      f"{name},{claim_cost},{allow_cost}")
+            CSV_OUTPUT_FILE.write(f"{output}\n")
+    else:
         output = (f"{street_address},{borough},{zip_code},{docket_number},{case_status},"
                   f"{close_code},{monthly_mci_incr_per_room},"
-                  f"{name},{claim_cost},{allow_cost}")
+                  f",,")
         CSV_OUTPUT_FILE.write(f"{output}\n")
-
-
 
 if __name__ == "__main__":
     headers = "street_address,borough,zip_code,docket_number,case_status,"\
