@@ -5,6 +5,7 @@ Regular expressions for parsing MCI Data fies
 
 # Date and Cost
 date_re = r"(\d{2}/\d{2}/\d{4})"
+# Costs are assumed to include cents (two decimal places) according to current report formatting.
 cost_re = r"(\d*\.\d{2})"
 optional_cost_re = r"( \d*\.\d{2})?"
 
@@ -14,7 +15,8 @@ zip_re = r"(\d{5})"
 docket_no_re = r"(\w{10})"
 status_re = "(OPEN|CLOSED)"
 close_code_re = r"(\w{2})"
-possible_mci_per_room_re = r"( \d*\.\d{2})?"
+# Monthly MCI increment values can appear with whole numbers or 1–2 decimal places (e.g., 0.3 or 18.66).
+possible_mci_per_room_re = r"( \d*(?:\.\d{1,2})?)?"
 
 work_item_re = r"(^[A-Z]\D*)"
 

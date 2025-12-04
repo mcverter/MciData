@@ -21,3 +21,5 @@ class PropertyMci(BaseModel):
     monthly_mci_incr_per_room: Optional[str] = None
     address: Optional[Address] = None
     work_items: list[WorkItem]
+    report_file: Optional[str] = None  # literal PDF filename (helps trace back to source document)
+    report_month: Optional[str] = None  # YYYY-MM month label derived from filename, Excel sortable/filterable

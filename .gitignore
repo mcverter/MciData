@@ -2,4 +2,7 @@
 .idea
 .vscode
 __pycache__
+.pytest_cache
 mci_output.csv
+output/processed_reports.log
+output/parse_reports.log
