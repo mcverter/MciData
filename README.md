@@ -1,6 +1,6 @@
 This repo provides helper scripts for handling Major Capital Improvement Case files from the NYS Division of Housing and Community Renewal.
 
-This repo is intended to be adapted for a larger project.  In its current form, it consiste of two scripts:
+This repo is intended to be adapted for a larger project.  In its current form, it consists of two scripts:
 * `src/fetch_reports.py` scrapes the transparency initiative page, downloads any month report PDFs that are not already present, and stores them in `data/`.
 * `src/parse_reports.py` walks through every PDF in `data/`, extracts the MCI data (assuming the current PDF layout), and appends results to `output/mci_output.csv`. Each row is prefixed with the source `report_file` and sortable `report_month` (YYYY-MM). Delete the CSV first if you want a clean regeneration instead of appending.
 
