@@ -18,7 +18,7 @@ PROCESSED_MANIFEST_FILE = os.path.join(BASE_DIR, "output", "processed_reports.lo
 LOG_FILEPATH = os.path.join(BASE_DIR, "output", "parse_reports.log")
 CSV_HEADERS = ("report_file,report_month,street_address,borough,zip_code,docket_number,case_status,closing_date,"
                "close_code,monthly_mci_incr_per_room,name,claim_cost,allow_cost\n")
-CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a")
+CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a+")
 REPORT_FILENAME_PATTERN = re.compile(
     r"(?P<month>january|february|march|april|may|june|july|august|september|october|november|december)"
     r"-(?P<year>\d{4})",
