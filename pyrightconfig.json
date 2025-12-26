@@ -1,0 +1,4 @@
+{
+  "include": ["src", "tests"],
+  "exclude": ["venv", ".venv", "virtualenvironment", "__pycache__", ".git"]
+}

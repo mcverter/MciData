@@ -1,16 +1,15 @@
+from dataclasses import dataclass
 import logging
-import pathlib
+from pathlib import Path
 import re
 import unicodedata
-from dataclasses import dataclass
-from typing import List
 
-import requests
 from bs4 import BeautifulSoup
+import requests
 
 # Identify our scraper politely when making HTTP requests.
 USER_AGENT = "MCI-Scraper/0.1"
-BASE_DIR = pathlib.Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 LISTING_URL = "https://hcr.ny.gov/office-rent-administration-transparency-initiative"
 REPORT_TEXT_PATTERN = re.compile(
@@ -41,9 +40,9 @@ def fetch_listing_html() -> str:
     return response.text
 
 
-def extract_report_links(html: str) -> List[ReportLink]:
+def extract_report_links(html: str) -> list[ReportLink]:
     soup = BeautifulSoup(html, "html.parser")
-    links: List[ReportLink] = []
+    links: list[ReportLink] = []
     for anchor in soup.find_all("a"):
         text = anchor.get_text(strip=True)
         href = anchor.get("href")
@@ -52,7 +51,7 @@ def extract_report_links(html: str) -> List[ReportLink]:
         # Match anchors whose visible text looks like "September 2025 MCI Closed Case Report".
         # TODO: consider using a more flexible selector so minor text/layout changes aren't missed.
         if REPORT_TEXT_PATTERN.fullmatch(text):
-            absolute_url = requests.compat.urljoin(LISTING_URL, href)
+            absolute_url: str = requests.compat.urljoin(LISTING_URL, href)
             links.append(ReportLink(title=text, url=absolute_url))
     return links
 
@@ -82,9 +81,11 @@ def download_link(link: ReportLink) -> bool:
         return False
 
     logging.info("Downloading %s -> %s", link.title, destination.name)
-    response = requests.get(link.url, headers={"User-Agent": USER_AGENT}, stream=True, timeout=60)
+    response = requests.get(
+        link.url, headers={"User-Agent": USER_AGENT}, stream=True, timeout=60
+    )
     response.raise_for_status()
-    with open(destination, "wb") as output_file:
+    with Path.open(destination, "wb") as output_file:
         for chunk in response.iter_content(chunk_size=8192):
             if chunk:
                 output_file.write(chunk)
