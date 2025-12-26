@@ -1,25 +1,33 @@
 from pydantic import BaseModel
-from typing import Optional
+
 """
 Classes for parsing MCI Files
 """
+
+
 class WorkItem(BaseModel):
-    name: Optional[str] = None
-    claim_cost: Optional[str] = None 
-    allow_cost: Optional[str] = None 
+    name: str | None = None
+    claim_cost: str | None = None
+    allow_cost: str | None = None
+
 
 class Address(BaseModel):
-    street_address: Optional[str] = None
-    borough: Optional[str] = None 
-    zip_code: Optional[str] = None
+    street_address: str | None = None
+    borough: str | None = None
+    zip_code: str | None = None
+
 
 class PropertyMci(BaseModel):
-    docket_number: Optional[str] = None
-    case_status: Optional[str] = None 
-    closing_date: Optional[str] = None
-    close_code: Optional[str] = None
-    monthly_mci_incr_per_room: Optional[str] = None
-    address: Optional[Address] = None
+    docket_number: str | None = None
+    case_status: str | None = None
+    closing_date: str | None = None
+    close_code: str | None = None
+    monthly_mci_incr_per_room: str | None = None
+    address: Address | None = None
     work_items: list[WorkItem]
-    report_file: Optional[str] = None  # literal PDF filename (helps trace back to source document)
-    report_month: Optional[str] = None  # YYYY-MM month label derived from filename, Excel sortable/filterable
+    report_file: str | None = (
+        None  # literal PDF filename (helps trace back to source document)
+    )
+    report_month: str | None = (
+        None  # YYYY-MM month label derived from filename, Excel sortable/filterable
+    )
