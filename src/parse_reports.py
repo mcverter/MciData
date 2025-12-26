@@ -2,10 +2,10 @@ import logging
 import os
 import pathlib
 from operator import attrgetter
-
+from src.lines.lines import get_line_type_and_matches
 import pdfplumber
 import re
-from regexes import borough_line_regex, street_address_line_regex, work_line_regex
+from src.lines.lines import borough_line_regex, street_address_line_regex, work_line_regex
 from classes import Address, WorkItem, PropertyMci
 """
 Parses all of the MCI files in a directory and outputs a csv file
@@ -158,6 +158,7 @@ def process_page(page, report_file: str, report_month: str, page_number: int,
     logger.info("Parsing %s page %s with %d lines", report_file, page_number, len(lines))
 
     for index, line in enumerate(lines):
+        line_type, matches = get_line_type_and_matches(line)
         # street address line indicates start of PropertyMci
         if m := re.match(street_address_line_regex, line):
             # Add previous PropertyMci to array
@@ -183,7 +184,7 @@ def process_page(page, report_file: str, report_month: str, page_number: int,
             property_mci.close_code = close_code
             property_mci.closing_date = closing_date
             property_mci.address = address
-            property_mci.monthly_mci_incr_per_room = mci_per_room.lstrip() if mci_per_room is not None else ""
+            property_mci.monthly_mci_incr_per_room = mci_per_room.lstrip() if mci_per_room else ""
         elif m := re.match(work_line_regex, line):
             if property_mci is None:
                 logger.warning("Work line encountered before street address in %s page %s: %s",

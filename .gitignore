@@ -6,3 +6,6 @@ __pycache__
 mci_output.csv
 output/processed_reports.log
 output/parse_reports.log
+
+#temp files
+*#

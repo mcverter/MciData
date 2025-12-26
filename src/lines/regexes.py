@@ -1,7 +1,12 @@
-import re
+from src.lines.work_status import work_status
+
 """
 Regular expressions for parsing MCI Data fies
 """
+
+def array_to_regex_or(arr: list[str]):
+    return "(" + "|".join(arr) + ")"
+
 
 # Date and Cost
 date_re = r"(\d{2}/\d{2}/\d{4})"
@@ -12,17 +17,12 @@ optional_cost_re = r"( \d*\.\d{2})?"
 # For Borough Line
 borough_re = r"(\w[\w ]+)"
 zip_re = r"(\d{5})"
-docket_no_re = r"(\w{10})"
-status_re = "(OPEN|CLOSED)"
+docket_no_re =  r"([A-Z]{2}[0-9]{6}[A-Z]{2})" # r"(\w{9, 10})" # # JX630020OM
+status_re =  array_to_regex_or(work_status) # "(OPEN|CLOSED)"
 close_code_re = r"(\w{2})"
 # Monthly MCI increment values can appear with whole numbers or 1–2 decimal places (e.g., 0.3 or 18.66).
 possible_mci_per_room_re = r"( \d*(?:\.\d{1,2})?)?"
 
 work_item_re = r"(^[A-Z]\D*)"
 
-# Line Regexes
-street_address_line_regex = re.compile(r"\d+.*")
-borough_line_regex = re.compile(borough_re + ", NY " + zip_re + " " + docket_no_re + " " + status_re \
-                     + " " + date_re + " " +  close_code_re + possible_mci_per_room_re)
-work_line_regex = re.compile(work_item_re + " " + cost_re + optional_cost_re)
-
+town_state_zip_re = ""
