@@ -1,6 +1,6 @@
+from pathlib import Path
 import shutil
 import sys
-from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = PROJECT_ROOT / "src"
@@ -13,7 +13,9 @@ if str(SRC_DIR) not in sys.path:
 from src import parse_reports
 
 
-def _run_single_report_check(tmp_path, pdf_filename: str, expected_filename: str) -> None:
+def _run_single_report_check(
+    tmp_path, pdf_filename: str, expected_filename: str
+) -> None:
     """
     Helper to parse a single PDF into a temp CSV and compare it to the fixture.
     """
@@ -35,7 +37,11 @@ def _run_single_report_check(tmp_path, pdf_filename: str, expected_filename: str
         parse_reports.configure_logger(str(temp_log_path))
 
         parse_reports.CSV_OUTPUT_FILE.write(parse_reports.CSV_HEADERS)
-        parse_reports.process_file(str(pdf_path), pdf_path.name, parse_reports.derive_report_month(pdf_path.name))
+        parse_reports.process_file(
+            str(pdf_path),
+            pdf_path.name,
+            parse_reports.derive_report_month(pdf_path.name),
+        )
         parse_reports.CSV_OUTPUT_FILE.close()
 
         actual_lines = temp_output_path.read_text().splitlines()

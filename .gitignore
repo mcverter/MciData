@@ -6,3 +6,20 @@ __pycache__
 mci_output.csv
 output/processed_reports.log
 output/parse_reports.log
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.pyright_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.env
+.DS_Store
+
+
+#temp files
+*#
