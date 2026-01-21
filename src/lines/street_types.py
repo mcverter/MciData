@@ -379,6 +379,7 @@ street_types = [
     "HTS",
     "HIGHWAY",
     "HIGHWAY",
+    "HW",
     "HWY",
     "HIGHWY",
     "HIWAY",

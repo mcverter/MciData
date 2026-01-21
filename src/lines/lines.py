@@ -139,4 +139,4 @@ def get_line_type_and_matches(
         return LineType.TOTAL_CASES_DOCUMENT_LINE, m
     if m := re.match(total_cases_plus_nys_header, line):
         return LineType.TOTAL_CASES_PLUS_NYS_DIVISION_HEADER, m
-    raise Exception("Line Type not expected ")
+    raise Exception(f"Line Type not expected {line}")
