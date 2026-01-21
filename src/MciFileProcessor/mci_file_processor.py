@@ -107,12 +107,12 @@ class MciFileProcessor:
         """Sets the street Address"""
         self.current_address = Address(street_address=line_matches.group(0))
 
-    def set_borough_and_docket(self, line_matches: re.Match[str]) -> None:
+    def set_property_county_and_docket(self, line_matches: re.Match[str]) -> None:
         """Completes Address information (borough, zip code) and adds Docket information"""
         if not self.current_address:
             raise Exception("Can't set borough because Address is not yet initialized")
         (
-            borough,
+            neighborhood,
             zip_code,
             docket_no,
             case_status,
@@ -120,7 +120,8 @@ class MciFileProcessor:
             close_code,
             mci_per_room,
         ) = line_matches.groups()
-        self.current_address.borough = borough
+        self.current_address.neighborhood = neighborhood
+        self.current_address.county = self.current_county
         self.current_address.zip_code = zip_code
         self.current_docket = Docket(
             docket_number=docket_no,
@@ -158,7 +159,7 @@ class MciFileProcessor:
             allow_cost=allow_cost.lstrip() if allow_cost is not None else "",
         )
 
-    def set_county(self, line_matches: re.Match[str]) -> None:
+    def set_page_county(self, line_matches: re.Match[str]) -> None:
         """To check county tallies, we set the current county being recorded"""
         self.current_county = line_matches.group(1)
 
@@ -244,7 +245,7 @@ class MciFileProcessor:
             case LineType.BOROUGH_DOCKET_LINE:
                 self.fsm_state = FsmState.UPDATE_DOCKET
                 self.increment_county_count()
-                self.set_borough_and_docket(line_matches)
+                self.set_property_county_and_docket(line_matches)
 
             # Docket Line indicates new docket number for previously used address
             case LineType.DOCKET_LINE:
@@ -266,7 +267,7 @@ class MciFileProcessor:
 
             case LineType.COUNTY_DATE_HEADER:
                 self.fsm_state = FsmState.START_COUNTY
-                self.set_county(line_matches)
+                self.set_page_county(line_matches)
 
             case LineType.COUNT_PER_COUNTY_LINE:
                 self.recheck_county_count(line_matches)
