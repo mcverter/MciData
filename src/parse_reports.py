@@ -19,7 +19,7 @@ CSV_OUTPUT_FILEPATH = os.path.join(BASE_DIR, "output", "mci_output.csv")
 PROCESSED_MANIFEST_FILE = os.path.join(BASE_DIR, "output", "processed_reports.log")
 LOG_FILEPATH = os.path.join(BASE_DIR, "output", "parse_reports.log")
 CSV_HEADERS = (
-    "report_file,report_month,street_address,borough,zip_code,docket_number,case_status,closing_date,"
+    "report_file,report_month,street_address,neighborhood,zip_code,county,docket_number,case_status,closing_date,"
     "close_code,monthly_mci_incr_per_room,name,claim_cost,allow_cost\n"
 )
 CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a+")
@@ -145,8 +145,8 @@ def write_mcis_to_csv(
     all_mcis: list[PropertyMci], filename: str, report_month: str
 ) -> None:
     for mci in all_mcis:
-        (street_address, borough, zip_code) = attrgetter(
-            "street_address", "borough", "zip_code"
+        (street_address, neighborhood, zip_code, county) = attrgetter(
+            "street_address", "neighborhood", "zip_code", "county"
         )(mci.address)
         (docket_number, case_status, close_code, closing_date) = attrgetter(
             "docket_number", "case_status", "close_code", "closing_date"
@@ -164,12 +164,11 @@ def write_mcis_to_csv(
             mci_work = claim_cost = allow_cost = ""
 
         output = (
-            f"{filename},{report_month},{street_address},{borough},{zip_code},{docket_number},{case_status},{closing_date},"
+            f"{filename},{report_month},{street_address},{neighborhood},{zip_code},{county},{docket_number},{case_status},{closing_date},"
             f"{close_code},{monthly_mci_incr_per_room},"
             f"{mci_work},{claim_cost},{allow_cost}"
         )
         CSV_OUTPUT_FILE.write(f"{output}\n")
-        pass
 
 
 if __name__ == "__main__":
