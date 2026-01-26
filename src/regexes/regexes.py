@@ -1,6 +1,6 @@
 """Regular expressions for parsing MCI Data fies"""
 
-from src.lines.work_status import work_status
+from src.regexes.work_status import work_status
 
 
 def array_to_regex_or(arr: list[str]) -> str:
