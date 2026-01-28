@@ -1,8 +1,8 @@
 from enum import Enum
 import re
 
-from src.lines.counties import counties
-from src.lines.regexes import (
+from src.regexes.counties import counties
+from src.regexes.regexes import (
     array_to_regex_or,
     borough_re,
     close_code_re,
@@ -15,7 +15,7 @@ from src.lines.regexes import (
     work_item_re,
     zip_re,
 )
-from src.lines.street_types import street_types
+from src.regexes.street_types import street_types
 
 
 class LineType(Enum):

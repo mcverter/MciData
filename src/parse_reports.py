@@ -4,11 +4,14 @@ import logging
 from operator import attrgetter
 import os
 import pathlib
-import re
 
 from finite_machine_states.fsm_state import FsmState
 from src.MciFileProcessor.mci_file_processor import MciFileProcessor
 from src.PropertyMci.property_mci import PropertyMci
+from src.regexes.filename_patterns import (
+    derive_report_month,
+    is_valid_input_filename,
+)
 
 """
 Parses all of the MCI files in a directory and outputs a csv file
@@ -23,11 +26,11 @@ CSV_HEADERS = (
     "close_code,monthly_mci_incr_per_room,name,claim_cost,allow_cost\n"
 )
 CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a+")
-REPORT_FILENAME_PATTERN = re.compile(
-    r"(?P<month>january|february|march|april|may|june|july|august|september|october|november|december)"
-    r"-(?P<year>\d{4})",
-    re.IGNORECASE,
-)
+# REPORT_FILENAME_PATTERN = re.compile(
+#      r"(?P<month>january|february|march|april|may|june|july|august|september|october|november|december|DirectFeed)"
+#     r"-(?P<year>\d{4})",
+#     re.IGNORECASE,
+# )
 FSM_STATE: FsmState = FsmState.START_DOCUMENT
 
 logger = logging.getLogger("parse_reports")
@@ -61,20 +64,6 @@ def set_output_file(path: str) -> None:
 
 
 configure_logger(str(LOG_FILEPATH))
-MONTH_LOOKUP = {
-    "january": "01",
-    "february": "02",
-    "march": "03",
-    "april": "04",
-    "may": "05",
-    "june": "06",
-    "july": "07",
-    "august": "08",
-    "september": "09",
-    "october": "10",
-    "november": "11",
-    "december": "12",
-}
 
 
 def load_processed_reports() -> set[str]:
@@ -96,20 +85,6 @@ def record_processed_report(filename: str) -> None:
         manifest.write(f"{filename}\n")
 
 
-def derive_report_month(filename: str) -> str:
-    """
-    Derives a sortable YYYY-MM label from the report filename.
-    Returns an empty string when the pattern does not match.
-    """
-    if match := REPORT_FILENAME_PATTERN.search(filename):
-        month = match.group("month").lower()
-        year = match.group("year")
-        month_number = MONTH_LOOKUP.get(month)
-        if month_number:
-            return f"{year}-{month_number}"
-    return ""
-
-
 def process_directory(path: str) -> None:
     """
     Processes all pdf files in directory
@@ -118,7 +93,7 @@ def process_directory(path: str) -> None:
     processed_reports = load_processed_reports()
 
     for file in os.listdir(path):
-        if file[-4:] != ".pdf":
+        if not is_valid_input_filename(file):
             continue
         if file in processed_reports:
             logger.info("Skipping %s (already processed)", file)
