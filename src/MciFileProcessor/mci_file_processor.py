@@ -192,17 +192,30 @@ class MciFileProcessor:
             return True
         return False
 
+    def process_txt_file(self)->list[PropertyMci]:
+        pass
+    def get_lines_from_file(self, filepath):
+        filetype = filepath[filepath.rindex("."):]
+        lines = []
+        if filetype == ".pdf":
+            file_text = ""
+            with pdfplumber.open(filepath) as pdf:
+                for page in pdf.pages:
+                    file_text += page.extract_text()
+            pdf.close()
+            lines = file_text.split("\n")
+        elif filetype == ".txt":
+            with open(filepath) as txt:
+                lines = txt.readlines()
+        return lines
+
+
     def process_file(self) -> list[PropertyMci]:
         """
         Processes all pages of pdf to construct a list of PropertyMCIs
         :return: List of PropertyMCIs derived from file
         """
-        file_text = ""
-        with pdfplumber.open(self.filepath) as pdf:
-            for page in pdf.pages:
-                file_text += page.extract_text()
-        pdf.close()
-        lines = file_text.split("\n")
+        lines = self.get_lines_from_file(self.filepath)
 
         for line in lines:
             self.process_line(line)

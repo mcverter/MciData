@@ -102,8 +102,6 @@ def process_directory(path: str) -> None:
         logger.info(
             "Processing file %s (report_month=%s)", file, report_month or "unknown"
         )
-        #        process_file(os.path.join(path, file), file, report_month)
-        # file_processor = MciFileProcessor(os.path.join(path, file), file, report_month)
         process_file(os.path.join(path, file), file, report_month)
         processed_reports.add(file)
         record_processed_report(file)
