@@ -42,11 +42,5 @@ def test_return_false_when_filetype_invalid():
 
 def test_return_true_when_direct_path_valid():
     for filetype in filetypes:
-        valid_filename = f"april-22-DirectFeed-{year}-mci-closed-case-report.{filetype}"
+        valid_filename = f"DirectFeed-22-april-{year}-mci-closed-case-report.{filetype}"
         assert is_valid_input_filename(valid_filename)
-
-
-# def test_return_true_when_direct_path_invalid():
-#     for filetype in filetypes:
-#         valid_filename = f"april-{year}-mci-closed-case-report.{filetype}"
-#         assert is_valid_input_filename(valid_filename)
