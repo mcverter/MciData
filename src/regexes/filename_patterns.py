@@ -1,8 +1,8 @@
 import re
 
 mci_report_pattern = re.compile(
+    r"(?P<direct_feed>(DirectFeed-\d\d-)?)"
     r"(?P<month>january|february|march|april|may|june|july|august|september|october|november|december)"
-    r"(?P<direct_feed>(-\d\d-DirectFeed)?)"
     r"-(?P<year>\d{4})"
     "-mci-closed-case-report",
     re.IGNORECASE,

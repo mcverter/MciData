@@ -19,10 +19,11 @@ TOTAL_CASES_DOCUMENT_LINE = "TOTAL NUMBER OF CASES: 38"
 
 
 def test_well_formed_lines_processed():
-    assert (
-        get_line_type_and_matches(NYS_DIVISION_HEADER)[0]
-        == LineType.NYS_DIVISION_HEADER
-    )
+    assert get_line_type_and_matches(NO_LINE)[0] == LineType.NO_LINE
+    assert get_line_type_and_matches(NYS_DIVISION_HEADER)[0] in [
+        LineType.NYS_DIVISION_HEADER,
+        LineType.NO_LINE,
+    ]
     assert (
         get_line_type_and_matches(OFFICE_OF_RENT_HEADER)[0]
         == LineType.OFFICE_OF_RENT_HEADER

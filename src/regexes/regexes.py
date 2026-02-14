@@ -1,11 +1,25 @@
 """Regular expressions for parsing MCI Data fies"""
 
+import re
+
 from src.regexes.work_status import work_status
 
 
 def array_to_regex_or(arr: list[str]) -> str:
     """Converts list of strings to regex OR string"""
     return "(" + "|".join(arr) + ")"
+
+
+def compile_line_regex(raw_string: str) -> re.Pattern[str]:
+    return re.compile(line_space_relax(raw_string), re.I)
+
+
+def line_space_relax(line: str) -> str:
+    return r"^\s*" + space_relax(line) + r"\s*$"
+
+
+def space_relax(string: str) -> str:
+    return r"\s+".join(string.split(r" "))
 
 
 # Date and Cost

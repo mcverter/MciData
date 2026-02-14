@@ -6,6 +6,7 @@ from src.regexes.regexes import (
     array_to_regex_or,
     borough_re,
     close_code_re,
+    compile_line_regex,
     cost_re,
     date_re,
     docket_no_re,
@@ -48,57 +49,60 @@ county_re = array_to_regex_or(counties)
 street_type_re = array_to_regex_or(street_types)
 
 # Line Regexes
-street_address_line_regex = re.compile(r"^\d+.*" + street_type_re + r".{0,7}$")
-docket_line_regex = re.compile(
-    "^"
-    + docket_no_re
-    + " "
-    + status_re
-    + " "
-    + date_re
-    + " "
-    + close_code_re
-    + possible_mci_per_room_re
+street_address_line_regex = compile_line_regex(r"\d+.*" + street_type_re + r".{0,7}")
+docket_line_regex = compile_line_regex(
+    f"{docket_no_re} {status_re} {date_re} {close_code_re}{possible_mci_per_room_re}"
 )
-borough_line_regex = re.compile(
-    "^"
-    + borough_re
-    + ", NY "
-    + zip_re
-    + " "
-    + docket_no_re
-    + " "
-    + status_re
-    + " "
-    + date_re
-    + " "
-    + close_code_re
-    + possible_mci_per_room_re
+borough_line_regex = compile_line_regex(
+    f"{borough_re}, NY {zip_re} {docket_no_re} {status_re} {date_re} {close_code_re}{possible_mci_per_room_re}"
 )
-work_line_regex = re.compile(
-    "^" + work_item_re + " " + cost_re + optional_cost_re + "$"
+work_line_regex = compile_line_regex(f"{work_item_re} {cost_re}{optional_cost_re}")
+empty_line = r"^[\s\n]*$"
+office_of_rent_header = compile_line_regex("OFFICE OF RENT ADMINISTRATION")
+nys_division_header = compile_line_regex(
+    "NYS DIVISION OF HOUSING AND COMMUNITY RENEWAL"
 )
-office_of_rent_header = re.compile("^OFFICE OF RENT ADMINISTRATION")
-nys_division_header = re.compile("^NYS DIVISION OF HOUSING AND COMMUNITY RENEWAL")
-major_capital_header = re.compile("^MAJOR CAPITAL IMPROVEMENT CASES")
-county_date_header = re.compile(
-    "^FOR " + county_re + " COUNTY FROM " + date_re + " TO " + date_re
+major_capital_header = compile_line_regex("MAJOR CAPITAL IMPROVEMENT CASES")
+county_date_header = compile_line_regex(
+    "FOR " + county_re + " COUNTY FROM " + date_re + " TO " + date_re
 )
-column_header_1 = re.compile(
-    "^BLDG ADDRESS DOCKET NO CASE STATUS CLOSING DATE CLOSE CODE MONTHLY MCI INCR PER ROOM"
+column_header_1 = compile_line_regex(
+    "BLDG ADDRESS DOCKET NO CASE STATUS CLOSING DATE CLOSE CODE MONTHLY MCI INCR PER ROOM"
 )
-double_dash_line = re.compile(
-    "^================================ ========= =========== ============ ========== ========================="
+double_dash_line = compile_line_regex(
+    "================================ ========= =========== ============ ========== ========================="
 )
-column_header_2 = re.compile("^MCI ITEM CLAIM COST ALLOW COST")
-single_dash_line = re.compile("^-------------------- ------------ ------------")
-total_cases_county_line = re.compile(r"^TOTAL CASES: (\d+)")
-count_per_county_line = re.compile("^" + county_re + r": (\d+)")
-total_cases_document_line = re.compile(r"^TOTAL NUMBER OF CASES: (\d+)")
+column_header_2 = compile_line_regex("MCI ITEM CLAIM COST ALLOW COST")
+single_dash_line = compile_line_regex("-------------------- ------------ ------------")
+total_cases_county_line = compile_line_regex(r"TOTAL CASES: (\d+)")
+count_per_county_line = compile_line_regex(county_re + r": (\d+)")
+total_cases_document_line = compile_line_regex(r"TOTAL NUMBER OF CASES: (\d+)")
 # These lines get run together by pdfplumber!
-total_cases_plus_nys_header = re.compile(
-    r"^TOTAL NUMBER OF CASES: \d+NYS DIVISION OF HOUSING AND COMMUNITY RENEWAL"
+total_cases_plus_nys_header = compile_line_regex(
+    r"TOTAL NUMBER OF CASES: \d+NYS DIVISION OF HOUSING AND COMMUNITY RENEWAL"
 )
+
+
+def is_well_formed_line(line: str) -> bool:
+    return (
+        re.match(empty_line, line)
+        or re.match(nys_division_header, line)
+        or re.match(office_of_rent_header, line)
+        or re.match(major_capital_header, line)
+        or re.match(column_header_1, line)
+        or re.match(column_header_2, line)
+        or re.match(double_dash_line, line)
+        or re.match(single_dash_line, line)
+        or re.match(county_date_header, line)
+        or re.match(street_address_line_regex, line)
+        or re.match(borough_line_regex, line)
+        or re.match(docket_line_regex, line)
+        or re.match(work_line_regex, line)
+        or re.match(total_cases_county_line, line)
+        or re.match(count_per_county_line, line)
+        or re.match(total_cases_document_line, line)
+        or re.match(total_cases_plus_nys_header, line)
+    )
 
 
 def get_line_type_and_matches(
@@ -106,9 +110,11 @@ def get_line_type_and_matches(
 ) -> tuple[LineType, re.Match[str]] | tuple[LineType, None]:
     # pdfplumber merges last line of page with first line of next page
     line = re.sub("NYS DIVISION OF HOUSING AND COMMUNITY RENEWAL", "", line)
+    # some files include page numbers
+    line = re.sub("PAGE\s+\d+", "", line)
 
-    if line == "":
-        return LineType.NYS_DIVISION_HEADER, None
+    if re.match(empty_line, line):
+        return LineType.NO_LINE, None
     if re.match(office_of_rent_header, line):
         return LineType.OFFICE_OF_RENT_HEADER, None
     if re.match(major_capital_header, line):
