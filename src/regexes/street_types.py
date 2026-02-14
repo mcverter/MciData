@@ -1,4 +1,4 @@
-### All the possible street types, as defined by USPS ###
+"""All the possible street types, as defined by USPS.  However, there are exceptions so this is unused"""
 
 street_types = [
     "ALLEY",

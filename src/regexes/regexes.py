@@ -11,21 +11,29 @@ def array_to_regex_or(arr: list[str]) -> str:
 
 
 def compile_line_regex(raw_string: str) -> re.Pattern[str]:
+    """Returns case-insensitive regex for line with arbitrary spacing"""
     return re.compile(line_space_relax(raw_string), re.I)
 
 
 def line_space_relax(line: str) -> str:
+    """Regex with arbitrary number of spaces at start, at end, and between words"""
     return r"^\s*" + space_relax(line) + r"\s*$"
 
 
 def space_relax(string: str) -> str:
+    """Regex with arbitrary number of spaces between words"""
     return r"\s+".join(string.split(r" "))
+
+
+def normalize_data(data: str) -> str:
+    """Strips surrounding whitespace and removes commas from data"""
+    return re.sub(",", " ", data.strip())
 
 
 # Date and Cost
 date_re = r"(\d{2}/\d{2}/\d{4})"
 # Costs are assumed to include cents (two decimal places) according to current report formatting.
-cost_re = r"(\d*\.\d{2})"
+cost_re = r"(\d+\.\d{2})"
 optional_cost_re = r"( \d*\.\d{2})?"
 
 # For Borough Line

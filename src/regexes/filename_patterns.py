@@ -1,3 +1,5 @@
+"""Verifies and extracts data from input filenames"""
+
 import re
 
 mci_report_pattern = re.compile(
@@ -24,6 +26,7 @@ month_lookup = {
 
 
 def is_valid_input_filename(filename: str) -> bool:
+    """Ensures that file is pdf or txt and has well-formed filename"""
     return filename[-4:] in [".pdf", ".txt"] and re.match(mci_report_pattern, filename)
 
 
@@ -35,7 +38,10 @@ def derive_report_month(filename: str) -> str:
     if match := mci_report_pattern.search(filename):
         month = match.group("month").lower()
         year = match.group("year")
+        direct_feed = match.group("direct_feed")
         month_number = month_lookup.get(month)
+        if direct_feed:
+            return f"{direct_feed}{month_number}-{year}"
         if month_number:
             return f"{year}-{month_number}"
     return ""

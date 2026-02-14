@@ -1,3 +1,5 @@
+"""Street address of property"""
+
 from dataclasses import dataclass
 
 

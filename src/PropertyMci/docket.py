@@ -1,3 +1,5 @@
+"""Court docket"""
+
 from dataclasses import dataclass
 
 

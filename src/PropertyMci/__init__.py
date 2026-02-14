@@ -1,0 +1,1 @@
+"""Initializes ProjectMci root directory"""

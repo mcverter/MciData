@@ -1,3 +1,5 @@
+"""Checks type of lines from input file"""
+
 from enum import Enum
 import re
 
@@ -49,7 +51,7 @@ county_re = array_to_regex_or(counties)
 street_type_re = array_to_regex_or(street_types)
 
 # Line Regexes
-street_address_line_regex = compile_line_regex(r"\d+.*" + street_type_re + r".{0,7}")
+street_address_line_regex = compile_line_regex(r"\d.*")
 docket_line_regex = compile_line_regex(
     f"{docket_no_re} {status_re} {date_re} {close_code_re}{possible_mci_per_room_re}"
 )
@@ -83,7 +85,8 @@ total_cases_plus_nys_header = compile_line_regex(
 )
 
 
-def is_well_formed_line(line: str) -> bool:
+def is_well_formed_line(line: str) -> re.Match[str] | None:
+    """Checks whether line matches an expected regex pattern"""
     return (
         re.match(empty_line, line)
         or re.match(nys_division_header, line)
@@ -108,11 +111,15 @@ def is_well_formed_line(line: str) -> bool:
 def get_line_type_and_matches(
     line: str,
 ) -> tuple[LineType, re.Match[str]] | tuple[LineType, None]:
+    """Returns LineType and matches from input line"""
     # pdfplumber merges last line of page with first line of next page
     line = re.sub("NYS DIVISION OF HOUSING AND COMMUNITY RENEWAL", "", line)
     # some files include page numbers
-    line = re.sub("PAGE\s+\d+", "", line)
+    line = re.sub(r"PAGE\s+\d+", "", line)
+    line = line.strip()
 
+    if re.search("1 ELEVATOR", line):
+        print("uh oh")
     if re.match(empty_line, line):
         return LineType.NO_LINE, None
     if re.match(office_of_rent_header, line):
@@ -129,14 +136,10 @@ def get_line_type_and_matches(
         return LineType.DASHES, None
     if m := re.match(county_date_header, line):
         return LineType.COUNTY_DATE_HEADER, m
-    if m := re.match(street_address_line_regex, line):
-        return LineType.STREET_ADDRESS_LINE, m
     if m := re.match(borough_line_regex, line):
         return LineType.BOROUGH_DOCKET_LINE, m
     if m := re.match(docket_line_regex, line):
         return LineType.DOCKET_LINE, m
-    if m := re.match(work_line_regex, line):
-        return LineType.MCI_WORK_LINE, m
     if m := re.match(total_cases_county_line, line):
         return LineType.TOTAL_CASES_COUNTY_LINE, m
     if m := re.match(count_per_county_line, line):
@@ -145,4 +148,11 @@ def get_line_type_and_matches(
         return LineType.TOTAL_CASES_DOCUMENT_LINE, m
     if m := re.match(total_cases_plus_nys_header, line):
         return LineType.TOTAL_CASES_PLUS_NYS_DIVISION_HEADER, m
+    # Work Lines and Addresses are the most variable
+    if m := re.match(work_line_regex, line):
+        return LineType.MCI_WORK_LINE, m
+    # Addresses can be distinguished from work lines by the presence of a cost
+    if not re.search(cost_re, line) and re.search(street_address_line_regex, line):
+        return LineType.STREET_ADDRESS_LINE, re.match(street_address_line_regex, line)
+
     raise Exception(f"Line Type not expected {line}")

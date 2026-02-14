@@ -1,3 +1,5 @@
+"""To keep track of file processing state. Currently unused."""
+
 ##########
 #
 # File parsed as Finite State Machine

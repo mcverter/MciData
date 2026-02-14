@@ -1,0 +1,1 @@
+"""Initializes project root directory"""

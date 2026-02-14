@@ -1,3 +1,5 @@
+"""Code for evaluating OCR pdf files"""
+
 import os.path
 import pathlib
 import sys
@@ -9,8 +11,9 @@ INPUT_DOCUMENT_BASE_DIR = os.path.join(BASE_DIR, "data", "DirectFeed")
 DEFAULT_INPUT_FILENAME = "DirectFeed-12-february-2026-mci-closed-case-report.txt"
 
 
-def check_ocr_file(filename: str) -> None:
-    with open(filename) as ocr:
+def check_ocr_file(filepath: str) -> None:
+    """Determines what proportion of OCR files have well-formed strings"""
+    with open(filepath) as ocr:
         lines = ocr.readlines()
         total_lines = len(lines)
         well_formed_lines = 0

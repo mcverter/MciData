@@ -1,4 +1,5 @@
-### List of New York State Counties ###
+"""List of New York State Counties"""
+
 from enum import Enum
 
 county_names = [

@@ -1,0 +1,1 @@
+"""Initializes lines directory"""

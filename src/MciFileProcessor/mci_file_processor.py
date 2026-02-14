@@ -13,9 +13,27 @@ from src.PropertyMci.address import Address
 from src.PropertyMci.docket import Docket
 from src.PropertyMci.property_mci import PropertyMci
 from src.PropertyMci.work_item import WorkItem
+from src.regexes.regexes import normalize_data
 
 if TYPE_CHECKING:
     import re
+
+
+def get_lines_from_file(filepath: str) -> list[str]:
+    """Returns list of lines from pdf or text file"""
+    filetype = filepath[filepath.rindex(".") :]
+    lines = []
+    if filetype == ".pdf":
+        file_text = ""
+        with pdfplumber.open(filepath) as pdf:
+            for page in pdf.pages:
+                file_text += page.extract_text()
+        pdf.close()
+        lines = file_text.split("\n")
+    elif filetype == ".txt":
+        with open(filepath) as txt:
+            lines = txt.readlines()
+    return lines
 
 
 class MciFileProcessor:
@@ -120,15 +138,17 @@ class MciFileProcessor:
             close_code,
             mci_per_room,
         ) = line_matches.groups()
-        self.current_address.neighborhood = neighborhood
+        self.current_address.neighborhood = normalize_data(neighborhood)
         self.current_address.county = self.current_county
-        self.current_address.zip_code = zip_code
+        self.current_address.zip_code = normalize_data(zip_code)
         self.current_docket = Docket(
-            docket_number=docket_no,
-            case_status=case_status,
-            close_code=close_code,
-            closing_date=closing_date,
-            monthly_mci_incr_per_room=mci_per_room.lstrip() if mci_per_room else "",
+            docket_number=normalize_data(docket_no),
+            case_status=normalize_data(case_status),
+            close_code=normalize_data(close_code),
+            closing_date=normalize_data(closing_date),
+            monthly_mci_incr_per_room=normalize_data(mci_per_room)
+            if mci_per_room
+            else "",
         )
 
     def set_docket(self, line_matches: re.Match[str]) -> None:
@@ -142,11 +162,13 @@ class MciFileProcessor:
         ) = line_matches.groups()
 
         self.current_docket = Docket(
-            docket_number=docket_no,
-            case_status=case_status,
-            close_code=close_code,
-            closing_date=closing_date,
-            monthly_mci_incr_per_room=mci_per_room.lstrip() if mci_per_room else "",
+            docket_number=normalize_data(docket_no),
+            case_status=normalize_data(case_status),
+            close_code=normalize_data(close_code),
+            closing_date=normalize_data(closing_date),
+            monthly_mci_incr_per_room=normalize_data(mci_per_room)
+            if mci_per_room
+            else "",
         )
 
     def set_work_line(self, line_matches: re.Match[str]) -> None:
@@ -154,9 +176,9 @@ class MciFileProcessor:
         mci_work, claim_cost, allow_cost = line_matches.groups()
 
         self.current_work_item = WorkItem(
-            mci_work=mci_work,
-            claim_cost=claim_cost,
-            allow_cost=allow_cost.lstrip() if allow_cost is not None else "",
+            mci_work=normalize_data(mci_work),
+            claim_cost=normalize_data(claim_cost),
+            allow_cost=normalize_data(allow_cost) if allow_cost is not None else "",
         )
 
     def set_page_county(self, line_matches: re.Match[str]) -> None:
@@ -164,6 +186,7 @@ class MciFileProcessor:
         self.current_county = line_matches.group(1)
 
     def increment_county_count(self) -> None:
+        """Increments the county count for each new address"""
         self.county_counts[self.current_county] += 1
 
     def check_county_count(self, line_matches: re.Match[str]) -> None:
@@ -192,27 +215,12 @@ class MciFileProcessor:
             return True
         return False
 
-    def get_lines_from_file(self, filepath: str) -> list[str]:
-        filetype = filepath[filepath.rindex(".") :]
-        lines = []
-        if filetype == ".pdf":
-            file_text = ""
-            with pdfplumber.open(filepath) as pdf:
-                for page in pdf.pages:
-                    file_text += page.extract_text()
-            pdf.close()
-            lines = file_text.split("\n")
-        elif filetype == ".txt":
-            with open(filepath) as txt:
-                lines = txt.readlines()
-        return lines
-
     def process_file(self) -> list[PropertyMci]:
         """
         Processes all pages of pdf to construct a list of PropertyMCIs
         :return: List of PropertyMCIs derived from file
         """
-        lines = self.get_lines_from_file(self.filepath)
+        lines = get_lines_from_file(self.filepath)
 
         for line in lines:
             self.process_line(line)

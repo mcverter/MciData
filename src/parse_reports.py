@@ -26,11 +26,6 @@ CSV_HEADERS = (
     "close_code,monthly_mci_incr_per_room,name,claim_cost,allow_cost\n"
 )
 CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a+")
-# REPORT_FILENAME_PATTERN = re.compile(
-#      r"(?P<month>january|february|march|april|may|june|july|august|september|october|november|december|DirectFeed)"
-#     r"-(?P<year>\d{4})",
-#     re.IGNORECASE,
-# )
 FSM_STATE: FsmState = FsmState.START_DOCUMENT
 
 logger = logging.getLogger("parse_reports")
@@ -109,6 +104,7 @@ def process_directory(path: str) -> None:
 
 
 def process_file(filepath: str, filename: str, report_month: str) -> None:
+    """Extracts MCIs from file and writes results to csv"""
     file_processor = MciFileProcessor(filepath)
     all_mcis = file_processor.process_file()
     write_mcis_to_csv(all_mcis, filename, report_month)
@@ -117,6 +113,7 @@ def process_file(filepath: str, filename: str, report_month: str) -> None:
 def write_mcis_to_csv(
     all_mcis: list[PropertyMci], filename: str, report_month: str
 ) -> None:
+    """Writes out MCIs to csv file"""
     for mci in all_mcis:
         (street_address, neighborhood, zip_code, county) = attrgetter(
             "street_address", "neighborhood", "zip_code", "county"

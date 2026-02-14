@@ -1,3 +1,5 @@
+"""Fetches report files from NYS government site"""
+
 from dataclasses import dataclass
 import logging
 from pathlib import Path
