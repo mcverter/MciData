@@ -1,5 +1,6 @@
 """Parses document from NYS State and produces csv"""
 
+import csv
 import logging
 from operator import attrgetter
 import os
@@ -21,11 +22,24 @@ INPUT_DOCUMENT_BASE_DIR = os.path.join(BASE_DIR, "data")
 CSV_OUTPUT_FILEPATH = os.path.join(BASE_DIR, "output", "mci_output.csv")
 PROCESSED_MANIFEST_FILE = os.path.join(BASE_DIR, "output", "processed_reports.log")
 LOG_FILEPATH = os.path.join(BASE_DIR, "output", "parse_reports.log")
-CSV_HEADERS = (
-    "report_file,report_month,street_address,neighborhood,zip_code,county,docket_number,case_status,closing_date,"
-    "close_code,monthly_mci_incr_per_room,name,claim_cost,allow_cost\n"
-)
-CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a+")
+CSV_HEADERS = [
+    "report_file",
+    "report_month",
+    "street_address",
+    "neighborhood",
+    "zip_code",
+    "county",
+    "docket_number",
+    "case_status",
+    "closing_date",
+    "close_code",
+    "monthly_mci_incr_per_room",
+    "name",
+    "claim_cost",
+    "allow_cost",
+]
+CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a+", newline="")
+CSV_WRITER = csv.writer(CSV_OUTPUT_FILE)
 FSM_STATE: FsmState = FsmState.START_DOCUMENT
 
 logger = logging.getLogger("parse_reports")
@@ -52,10 +66,11 @@ def set_output_file(path: str) -> None:
     """
     Override the CSV output path. Useful for tests.
     """
-    global CSV_OUTPUT_FILEPATH, CSV_OUTPUT_FILE
+    global CSV_OUTPUT_FILEPATH, CSV_OUTPUT_FILE, CSV_WRITER
     CSV_OUTPUT_FILE.close()
     CSV_OUTPUT_FILEPATH = path
-    CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a")
+    CSV_OUTPUT_FILE = open(CSV_OUTPUT_FILEPATH, "a", newline="")
+    CSV_WRITER = csv.writer(CSV_OUTPUT_FILE)
 
 
 configure_logger(str(LOG_FILEPATH))
@@ -133,15 +148,27 @@ def write_mcis_to_csv(
         else:
             mci_work = claim_cost = allow_cost = ""
 
-        output = (
-            f"{filename},{report_month},{street_address},{neighborhood},{zip_code},{county},{docket_number},{case_status},{closing_date},"
-            f"{close_code},{monthly_mci_incr_per_room},"
-            f"{mci_work},{claim_cost},{allow_cost}"
+        CSV_WRITER.writerow(
+            [
+                filename,
+                report_month,
+                street_address,
+                neighborhood,
+                zip_code,
+                county,
+                docket_number,
+                case_status,
+                closing_date,
+                close_code,
+                monthly_mci_incr_per_room,
+                mci_work,
+                claim_cost,
+                allow_cost,
+            ]
         )
-        CSV_OUTPUT_FILE.write(f"{output}\n")
 
 
 if __name__ == "__main__":
-    CSV_OUTPUT_FILE.write(CSV_HEADERS)
+    CSV_WRITER.writerow(CSV_HEADERS)
     process_directory(INPUT_DOCUMENT_BASE_DIR)
     CSV_OUTPUT_FILE.close()
