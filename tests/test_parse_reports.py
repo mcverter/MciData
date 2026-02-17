@@ -36,7 +36,7 @@ def _run_single_report_check(
         parse_reports.PROCESSED_MANIFEST_FILE = str(temp_manifest_path)
         parse_reports.configure_logger(str(temp_log_path))
 
-        parse_reports.CSV_OUTPUT_FILE.write(parse_reports.CSV_HEADERS)
+        parse_reports.CSV_WRITER.writerow(parse_reports.CSV_HEADERS)
         parse_reports.process_file(
             str(pdf_path),
             pdf_path.name,
@@ -91,7 +91,7 @@ def test_duplicate_report_is_skipped(tmp_path):
         parse_reports.configure_logger(str(temp_log_path))
 
         # First pass: file is downloaded for the first time, so rows should be emitted.
-        parse_reports.CSV_OUTPUT_FILE.write(parse_reports.CSV_HEADERS)
+        parse_reports.CSV_WRITER.writerow(parse_reports.CSV_HEADERS)
         parse_reports.process_directory(parse_reports.INPUT_DOCUMENT_BASE_DIR)
         parse_reports.CSV_OUTPUT_FILE.close()
         first_run_lines = temp_output_path.read_text().splitlines()

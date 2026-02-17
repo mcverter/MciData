@@ -1,0 +1,49 @@
+name: Fetch and Parse MCI Reports
+
+on:
+  schedule:
+    # Run on the 5th of each month at 10:00 UTC.
+    # Reports are typically published for the prior month, so the 5th
+    # gives a few days of buffer.
+    - cron: "0 10 5 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-parse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch latest reports
+        run: python src/fetch_reports.py
+
+      - name: Parse reports
+        run: python src/parse_reports.py
+
+      - name: Run tests
+        run: pytest tests/test_parse_reports.py
+
+      - name: Commit and push new data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ output/mci_output.csv output/processed_reports.log
+          if git diff --cached --quiet; then
+            echo "No new data to commit."
+          else
+            git commit -m "chore: fetch and parse MCI reports $(date +%Y-%m)"
+            git push
+          fi
