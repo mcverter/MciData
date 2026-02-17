@@ -33,6 +33,9 @@ jobs:
       - name: Parse reports
         run: python src/parse_reports.py
 
+      - name: Run tests
+        run: pytest tests/test_parse_reports.py
+
       - name: Commit and push new data
         run: |
           git config user.name "github-actions[bot]"
